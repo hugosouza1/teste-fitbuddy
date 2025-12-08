@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS grupos (
+  id SERIAL PRIMARY KEY,
+  nome TEXT NOT NULL,
+  recompensa TEXT DEFAULT NULL,
+  icone TEXT DEFAULT NULL,
+  data_inicio TIMESTAMP DEFAULT now(),
+  data_termino TIMESTAMP DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS membros_de (
+  email TEXT REFERENCES usuarios(email) ON DELETE CASCADE,
+  id_grupo INTEGER REFERENCES grupos(id) ON DELETE CASCADE,
+  pontos INTEGER DEFAULT 0,
+  PRIMARY KEY (email, id_grupo)
+);

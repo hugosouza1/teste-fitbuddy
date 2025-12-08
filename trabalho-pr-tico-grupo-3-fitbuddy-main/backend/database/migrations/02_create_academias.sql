@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS academia (
+  id SERIAL PRIMARY KEY,
+  nome TEXT NOT NULL,
+  cidade TEXT NOT NULL,
+  logradouro TEXT NOT NULL UNIQUE
+);
+
+ALTER TABLE usuarios
+ADD COLUMN academia INTEGER REFERENCES academia(id);
