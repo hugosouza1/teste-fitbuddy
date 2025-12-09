@@ -1,5 +1,6 @@
 const { pool, getClient } = require('../../database/pool'); 
 const bcrypt = require('bcrypt');
+const { deleteUserPictures } = require('../service/pictureService.js');
 
 async function hashPassword(password) {
   const saltRounds = 10;
@@ -300,9 +301,11 @@ const createUser = async (req, res) => {
         return res.status(400).json({ error: 'Nome, email e senha são obrigatórios.' })
     }
     
-    if(typeof name !== 'string' || name.trim() === '' || typeof email !== 'string' || email.trim() === '' || typeof password !== 'string' || password.length < 2){
+    if(typeof name !== 'string' || name.trim() === '' || 
+    typeof email !== 'string' || email.trim() === '' || typeof password 
+    !== 'string' || password.length < 1){
         console.warn('[POST /api/register] Dados inválidos:', { name, email, passwordLength: password.length })
-        return res.status(400).json({ error: 'Dados inválidos. Verifique nome, email e senha (mínimo 6 caracteres).' })
+        return res.status(400).json({ error: 'Dados inválidos. Verifique nome, email e senha (mínimo 1 caracteres).' })
     }
     
     let client 
@@ -401,10 +404,10 @@ const deleteProfile = async (req, res) => {
 
   try {
     await cliente.query('BEGIN');
-
+    
     const sqlDelete = 'DELETE FROM usuarios WHERE email = $1';
     const result = await cliente.query(sqlDelete, [email]);
-
+    
     await cliente.query('COMMIT');
 
     if (result.rowCount === 0) {
@@ -412,6 +415,8 @@ const deleteProfile = async (req, res) => {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
+    await deleteUserPictures(email);
+    
     console.log('Conta apagada:', email);
     return res.status(200).json({ message: 'Conta apagada com sucesso', email });
 

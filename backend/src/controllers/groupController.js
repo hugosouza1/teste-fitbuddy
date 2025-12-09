@@ -1,8 +1,7 @@
 const { getClient, pool } = require('../../database/pool');
 
 const updateGroup = async (req, res) => {
-  const { id } = req.params;
-  console.log('updateGroup called for id:', id, 'body:', req.body);
+    const { id } = req.params;
     const { nome, recompensa, icone, data_inicio, data_termino } = req.body;
 
     if (!id) return res.status(400).json({ error: 'ID do grupo não fornecido.' });
@@ -61,7 +60,49 @@ const updateGroup = async (req, res) => {
     }
 };
 
+const inviteMembers = async (req, res) => {
+    const { id } = req.params; 
+    const { email } = req.body; 
 
+    if(!id){
+        return res.status(400).json({ error: 'ID do grupo não fornecido.' });
+    }
+
+    if(!email){
+        return res.status(400).json({ error: 'Email inválido.', email });
+    }
+
+    const client = await getClient();
+
+    try{
+        await client.query('BEGIN');
+
+        const sql = `
+                INSERT INTO convites_grupo (id_grupo, email_convidado)
+                VALUES ($1, $2)
+                ON CONFLICT (id_grupo, email_convidado) DO NOTHING
+        `;
+
+        await client.query(sql, [id, email]);
+
+        await client.query('COMMIT');
+        
+        return res.status(201).json({ message: 'Convites enviados com sucesso!'});
+
+    }catch(err){
+        await client.query('ROLLBACK');
+        
+        if (err.code === '23503') {
+            console.warn(`[inviteMembers] Falha de FK: ${err.detail}`);
+            return res.status(404).json({ error: 'Grupo não encontrado ou um dos usuários convidados não existe.' });
+        }
+
+        console.error('Erro ao enviar convites:', err);
+        return res.status(500).json({ error: 'Erro interno ao enviar convites.' });
+    }finally{
+        client.release();
+    }
+};
 
 const getGrupos = async (req, res) => {
     const { email } = req.query;
@@ -80,7 +121,6 @@ const getGrupos = async (req, res) => {
 
         const result = await pool.query(sql, [email]);
         
-        // Retorna sempre array (pode estar vazio)
         return res.status(200).json(result.rows || []);
 
     } catch (err) {
@@ -100,7 +140,6 @@ const createGrupo = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // Criar grupo
     const insertGroupSQL = `
       INSERT INTO grupos (nome, icone, recompensa, data_inicio, data_termino)
       VALUES ($1, $2, $3, $4, $5)
@@ -109,7 +148,6 @@ const createGrupo = async (req, res) => {
     const groupRes = await client.query(insertGroupSQL, [nome, icone, recompensa, data_inicio, data_termino]);
     const groupId = groupRes.rows[0].id;
 
-    // Adicionar usuário como membro
     const insertMemberSQL = `
       INSERT INTO membros_de (id_grupo, email) VALUES ($1, $2)
     `;
@@ -126,48 +164,10 @@ const createGrupo = async (req, res) => {
   }
 };
 
-
-
-const addMember = async (req, res) => {
-  const { email, id } = req.body;
-
-  if (!email || !id) {
-    console.log('Dados incompletos:', { email: !!email, id: !!id });
-    return res.status(400).json({ error: 'Dados incompletos' });
-  }
-
-  const client = await pool.connect();
-
-  try {
-    await client.query('BEGIN');
-
-    const sql = `INSERT INTO membros_de (email, id_grupo) VALUES ($1, $2)`;
-    await client.query(sql, [email, id]);
-
-    await client.query('COMMIT');
-    return res.status(200).json({ message: 'Membro adicionado com sucesso' });
-
-  } catch (err) {
-    await client.query('ROLLBACK');
-
-    console.error('Erro ao adicionar membro:', err);
-
-    if (err.code === '23505') { // chave primária duplicada
-      return res.status(400).json({ error: 'Membro já está no grupo' });
-    }
-
-    return res.status(500).json({ error: 'Erro interno no servidor' });
-  } finally {
-    client.release();
-  }
-};
-
-
 const removeMember = async (req, res) => {
   const { email, id } = req.body;
 
   if (!email || !id) {
-    console.log('Dados incompletos:', { email: !!email, id: !!id });
     return res.status(400).json({ error: 'Dados incompletos' });
   }
 
@@ -194,7 +194,6 @@ const removeMember = async (req, res) => {
     client.release();
   }
 };
-
 
 const getMembers = async (req, res) => {
   const { id } = req.params;
@@ -224,11 +223,111 @@ const getMembers = async (req, res) => {
   }
 };
 
+
+const getFriends = async (req, res) => {
+  const { id: email } = req.params;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email não fornecido.' });
+  }
+
+  try {
+    const sql = `
+      SELECT DISTINCT email, name
+      FROM (
+          SELECT a.usuario1_email AS email, u.nome AS name
+          FROM amigos a
+          LEFT JOIN usuarios u ON u.email = a.usuario1_email
+          WHERE a.usuario2_email = $1
+
+          UNION ALL
+
+          SELECT a.usuario2_email AS email, u.nome AS name
+          FROM amigos a
+          LEFT JOIN usuarios u ON u.email = a.usuario2_email
+          WHERE a.usuario1_email = $1
+      ) AS all_friends
+      ORDER BY name;
+
+    `;
+
+    const result = await pool.query(sql, [email]);
+
+    // Retorna array de {email, name}
+    return res.status(200).json(result.rows || []);
+
+  } catch (err) {
+    console.error('Erro ao buscar amigos:', err);
+    return res.status(500).json({ error: 'Erro interno no servidor' });
+  }
+};
+
+const acceptGroupInvite = async (req, res) => {
+  const { groupId, userEmail } = req.body;
+
+  if (!groupId || !userEmail) {
+    return res.status(400).json({ error: 'ID do grupo e email do usuário são obrigatórios.' });
+  }
+
+  const client = await getClient();
+  try {
+    await client.query('BEGIN');
+
+    // Adiciona usuário como membro do grupo
+    const insertMemberSql = `
+      INSERT INTO membros_de (id_grupo, email)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+    `;
+    await client.query(insertMemberSql, [groupId, userEmail]);
+
+    // Remove o convite da tabela convites_grupo
+    const deleteInviteSql = `
+      DELETE FROM convites_grupo
+      WHERE id_grupo = $1 AND email_convidado = $2
+    `;
+    await client.query(deleteInviteSql, [groupId, userEmail]);
+
+    await client.query('COMMIT');
+    return res.status(200).json({ success: true, message: 'Convite aceito' });
+
+  } catch (err) {
+    try { await client.query('ROLLBACK'); } catch (e) { console.error('Rollback falhou', e); }
+    console.error('Erro ao aceitar convite de grupo:', err);
+    return res.status(500).json({ error: 'Erro ao aceitar convite de grupo' });
+  } finally {
+    try { client.release(); } catch (e) { /* ignore */ }
+  }
+};
+
+const rejectGroupInvite = async (req, res) => {
+  const { groupId, userEmail } = req.body;
+
+  if (!groupId || !userEmail) {
+    return res.status(400).json({ error: 'ID do grupo e email do usuário são obrigatórios.' });
+  }
+
+  try {
+    const sql = `
+      DELETE FROM convites_grupo
+      WHERE id_grupo = $1 AND email_convidado = $2
+    `;
+    await pool.query(sql, [groupId, userEmail]);
+    return res.status(200).json({ success: true, message: 'Convite rejeitado' });
+  } catch (err) {
+    console.error('Erro ao rejeitar convite de grupo:', err);
+    return res.status(500).json({ error: 'Erro ao rejeitar convite de grupo' });
+  }
+};
+
 module.exports = {
     updateGroup,
     getGrupos,
+    inviteMembers,
     createGrupo,
-    addMember,
     removeMember,
-    getMembers
+    getMembers,
+    getFriends,
+    acceptGroupInvite,
+    rejectGroupInvite
 };

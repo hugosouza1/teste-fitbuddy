@@ -32,6 +32,45 @@ const friendshipNotifications = async (req, res) => {
   }
 }
 
+const groupNotifications = async (req, res) => {
+  const email = req.params.email
+  if(email === undefined || email.trim().length === 0) {
+    return res.status(400).json({error: 'Email do usuário não foi informado.'})
+  }
+  let from = req.query.from;
+  if(from === undefined || from.trim().length === 0) {
+    from = new Date().toISOString()
+  }
+  let search = `
+    SELECT 
+      g.id,
+      g.nome,
+      g.icone,
+      g.recompensa,
+      g.data_inicio,
+      g.data_termino,
+      cg.created_at AS data,
+      CASE
+        WHEN cg.created_at > u.notificado THEN true
+        ELSE false
+      END AS nova_solicitacao
+    FROM convites_grupo cg
+    JOIN grupos g ON cg.id_grupo = g.id
+    JOIN usuarios u ON cg.email_convidado = u.email
+    WHERE cg.email_convidado = $1 AND cg.created_at < $2
+    ORDER BY cg.created_at DESC
+    LIMIT 10;
+  `;
+  const params = [email, from]
+  try {
+    const result = await pool.query(search, params)
+    return res.status(200).json(result.rows)
+  } catch(err) {
+    console.log(err)
+    return res.status(500).json({error: 'Não foi possível recuperar as notificações de grupo'})
+  }
+}
+
 const updateUserNotified = async (req, res) => {
   const email = req.params.email
 
@@ -51,5 +90,6 @@ const updateUserNotified = async (req, res) => {
 
 module.exports = {
   friendshipNotifications,
+  groupNotifications,
   updateUserNotified,
 }

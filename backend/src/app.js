@@ -30,6 +30,8 @@ const gymRoutes = require('./routes/gymRoutes');
 const partnersRoutes = require('./routes/partnersRoutes');
 const notificationsRoutes = require('./routes/notificationsRoutes');
 const groupRoutes = require('./routes/groupRoutes');
+const rankingRoutes = require('./routes/rankingRoutes');
+const checkinRoutes = require('./routes/checkinRoutes');
 
 const app = express();
 const PORT = process.env.PORT;
@@ -43,6 +45,8 @@ app.use('/api/gym', gymRoutes);
 app.use('/api/partners', partnersRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/groups', groupRoutes);
+app.use('/api/ranking', rankingRoutes);
+app.use('/api/checkin', checkinRoutes);
 app.use(errorHandler);
 
 app.get('/', (req, res) => {
