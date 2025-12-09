@@ -1,4 +1,4 @@
-import { StyleSheet, SafeAreaView, StatusBar, View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, View, Text} from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
 const GroupsCard = () => {

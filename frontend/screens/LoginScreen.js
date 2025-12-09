@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, ScrollView, TouchableOpacity, View, KeyboardAvoidingView, Alert, Image, ActivityIndicator, Platform } from 'react-native';
+import { StyleSheet, Text, TextInput, ScrollView, TouchableOpacity, View, KeyboardAvoidingView, Image, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import Logo from '../../assets/images/Logo.png';
 import useLogin from "../hooks/login/useLogin";

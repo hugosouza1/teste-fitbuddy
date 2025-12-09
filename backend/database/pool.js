@@ -1,4 +1,3 @@
-// backend/database/pool.js
 require('dotenv').config('../../.env');
 const { Pool } = require('pg');
 
@@ -36,16 +35,12 @@ const pool = new Pool({
     : false
 });
 
-// log de erros não tratados do pool (importante em produção)
 pool.on('error', (err, client) => {
   console.error('Unexpected error on idle pg client', err);
-  // não finalizar o processo automaticamente — permita que o app trate conforme necessário
 });
 
-// Helper: obter client para transações
 async function getClient() {
   const client = await pool.connect();
-  // opcional: emitir aviso se o client ficar preso
   const timeout = setTimeout(() => {
     console.warn('A client has been checked out for more than 5 seconds!');
   }, 5000);
@@ -60,7 +55,6 @@ async function getClient() {
   return client;
 }
 
-// Graceful shutdown (útil em dev e deploy)
 async function closePool() {
   try {
     await pool.end();
@@ -70,7 +64,6 @@ async function closePool() {
   }
 }
 
-// opcional: fechar o pool ao receber sinais do sistema
 if (process.env.NODE_ENV !== 'test') {
   process.on('SIGINT', async () => {
     await closePool();

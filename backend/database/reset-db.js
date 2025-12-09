@@ -22,7 +22,6 @@ async function resetDatabase({ keepMigrations = false } = {}) {
 
     console.log('Tabelas encontradas:', tables);
 
-    // opcionalmente filtrar migrations
     const toDrop = tables.filter(t => !(keepMigrations && t === 'migrations'));
 
     if (toDrop.length === 0) {
@@ -30,7 +29,6 @@ async function resetDatabase({ keepMigrations = false } = {}) {
       return;
     }
 
-    // Dropar cada tabela (ou construir um único comando)
     const dropSql = toDrop.map(t => `"public"."${t}"`).join(', ');
     console.log('Executando DROP TABLE CASCADE para:', toDrop);
     await pool.query(`DROP TABLE IF EXISTS ${dropSql} CASCADE;`);
@@ -45,7 +43,6 @@ async function resetDatabase({ keepMigrations = false } = {}) {
 }
 
 if (require.main === module) {
-  // se quiser preservar migrations, passe { keepMigrations: true }
   resetDatabase({ keepMigrations: false });
 }
 

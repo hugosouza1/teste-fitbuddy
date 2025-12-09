@@ -8,8 +8,6 @@ import NotificationsCard from '../components/Home/NotificationsCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = ({ onNavigate, onCheckinPress }) => {
-  const [email, setEmail] = useState('');
-  const [user, setUser] = useState(null); 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

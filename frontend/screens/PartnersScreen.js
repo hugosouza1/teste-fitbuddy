@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, ScrollView, TouchableOpacity, View, Alert, ActivityIndicator, FlatList, Platform } from 'react-native';
+import { StyleSheet, Text, View, Alert, ActivityIndicator, FlatList, Platform } from 'react-native';
 import PartnerSuggestionCard from '../components/Partner/PartnerSuggestionCard'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

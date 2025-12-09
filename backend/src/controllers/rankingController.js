@@ -1,8 +1,5 @@
 const { pool } = require("../../database/pool");
 
-// ===============================================
-//  RANKING PESSOAL DENTRO DO GRUPO
-// ===============================================
 exports.getGroupPersonalRanking = async (req, res) => {
   try {
     const { groupId, email } = req.params;
@@ -11,7 +8,6 @@ exports.getGroupPersonalRanking = async (req, res) => {
       return res.status(400).json({ error: "groupId e email são obrigatórios" });
     }
 
-    // Buscar info do usuário
     const userResult = await pool.query(
       `SELECT nome, foto FROM usuarios WHERE email = $1`,
       [email]
@@ -23,7 +19,6 @@ exports.getGroupPersonalRanking = async (req, res) => {
 
     const { nome, foto } = userResult.rows[0];
 
-    // Ranking completo do grupo, com pontos da tabela membros_de
     const rankingResult = await pool.query(
       `
       SELECT 
@@ -47,10 +42,9 @@ exports.getGroupPersonalRanking = async (req, res) => {
 
     const totalUsuarios = ranking.length;
 
-    // Procura o usuário no ranking
+
     let idx = ranking.findIndex((r) => r.email === email);
 
-    // se não estiver em membros_de, ele não pertence ao grupo
     if (idx === -1) {
       return res.status(403).json({ error: "Usuário não pertence a este grupo" });
     }
@@ -71,9 +65,7 @@ exports.getGroupPersonalRanking = async (req, res) => {
   }
 };
 
-// ===============================================
-//  RANKING COMPLETO DOS MEMBROS DO GRUPO
-// ===============================================
+
 exports.getGroupRankingList = async (req, res) => {
   try {
     const { groupId } = req.params;

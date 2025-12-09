@@ -1,5 +1,4 @@
-import React, {useState, useEffect} from 'react'
-import { ActivityIndicator, Alert, Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator,  Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useCheckin } from '../hooks/checkin/useCheckIn';
 
 const checkInScreen = () => {

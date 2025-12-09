@@ -147,7 +147,6 @@ const updateUserProfile = async (req, res) => {
     return res.status(400).json({ error: 'Campo "email" obrigatório.' });
   }
 
-  // Campos permitidos por tabela
   const usuariosAllowed = ['nome', 'data_nascimento', 'foto', 'descricao', 'academia'];
   const preferenciasAllowed = ['gosto_musical', 'objetivo', 'experiencia'];
 
@@ -155,7 +154,7 @@ const updateUserProfile = async (req, res) => {
   const usuariosUpdate = {};
 
   for (const k of usuariosAllowed) {
-    if (Object.prototype.hasOwnProperty.call(body, k)) {
+    if (Object.hasOwn(body, k)) {
       if (k === 'data_nascimento') {
         const raw = body.data_nascimento ?? body.birthDate ?? body.data_nascimento;
         if (raw === null || raw === undefined || raw === '') {
@@ -178,17 +177,15 @@ const updateUserProfile = async (req, res) => {
     }
   }
 
-  // preferencias
   const preferenciasUpdate = {};
   for (const k of preferenciasAllowed) {
-    if (Object.prototype.hasOwnProperty.call(body, k)) {
+    if (Object.hasOwn(body, k)) {
       preferenciasUpdate[k] = body[k] === null ? null : String(body[k]);
     }
   }
 
-  // Horarios: aceita array ou string
   let horariosArr = null;
-  if (Object.prototype.hasOwnProperty.call(body, 'horario') || Object.prototype.hasOwnProperty.call(body, 'horarios')) {
+  if (Object.hasOwn(body, 'horario') || Object.hasOwn(body, 'horarios')) {
     const raw = body.horario ?? body.horarios;
     if (raw === null) {
       horariosArr = []; // limpar todos
@@ -209,7 +206,6 @@ const updateUserProfile = async (req, res) => {
     horariosArr = Array.from(new Set(horariosArr)).sort();
   }
 
-  // If nothing to update
   if (Object.keys(usuariosUpdate).length === 0 && Object.keys(preferenciasUpdate).length === 0 && horariosArr === null) {
     return res.status(400).json({ error: 'Nenhum campo válido fornecido para atualização.' });
   }

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Navbar from './components/Home/Navbar';
 import Header from './components/Home/Header';
 import HomeScreen from './screens/HomeScreen';

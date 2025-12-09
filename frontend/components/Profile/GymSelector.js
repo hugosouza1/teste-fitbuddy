@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import {ActivityIndicator, Alert, FlatList, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { useState, useEffect } from 'react';
+import {ActivityIndicator, FlatList, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
 
 const BACKEND_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
 

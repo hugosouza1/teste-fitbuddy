@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ActivityIndicator, Alert, Platform } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
 import { enviarSolicitacaoDeAmizade } from '../../services/friend/friendshipService';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BACKEND_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
 

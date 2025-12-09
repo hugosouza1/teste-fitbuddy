@@ -1,5 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { StyleSheet, SafeAreaView, StatusBar, View, Text, ScrollView, TouchableOpacity, Modal, Image } from 'react-native';
+import { StyleSheet,View, TouchableOpacity, Image } from 'react-native';
 import LogoCompleta from '../../../assets/images/LogoCompleta.png'
 
 const Header = ({onNavigate}) => {

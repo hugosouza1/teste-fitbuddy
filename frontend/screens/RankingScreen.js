@@ -29,9 +29,7 @@ export default function RankingScreen() {
 
   const [groupModalVisible, setGroupModalVisible] = useState(false);
 
-  // ============================
-  // Carrega grupos do usuário
-  // ============================
+
   const fetchGroups = async (userEmail) => {
     try {
       const res = await fetch(
@@ -62,9 +60,6 @@ export default function RankingScreen() {
     }
   };
 
-  // ============================
-  // Carrega ranking do grupo
-  // ============================
   const loadRanking = async (selectedGroupId, userEmail) => {
     if (!selectedGroupId || !userEmail) {
       setErroGrupo("Selecione um grupo para ver o ranking.");
@@ -118,9 +113,6 @@ export default function RankingScreen() {
     }
   };
 
-  // ============================
-  // Efeito inicial
-  // ============================
   useEffect(() => {
     const init = async () => {
       try {
@@ -163,9 +155,6 @@ export default function RankingScreen() {
     init();
   }, []);
 
-  // ============================
-  // Trocar grupo pela UI
-  // ============================
   const handleSelectGroup = async (id) => {
     const idStr = String(id);
     setGroupId(idStr);
@@ -177,9 +166,6 @@ export default function RankingScreen() {
     }
   };
 
-  // ============================
-  // Render
-  // ============================
   if (loading) {
     return (
       <View style={styles.loading}>
@@ -193,9 +179,6 @@ export default function RankingScreen() {
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Ranking do Grupo</Text>
 
-      {/* =============================== */}
-      {/* SELETOR DE GRUPOS (DROPDOWN)   */}
-      {/* =============================== */}
       <View style={styles.groupSelector}>
         <Text style={styles.groupSelectorLabel}>Grupo selecionado:</Text>
 
@@ -210,9 +193,6 @@ export default function RankingScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* =============================== */}
-      {/* MODAL DE SELEÇÃO DE GRUPOS     */}
-      {/* =============================== */}
       <Modal
         visible={groupModalVisible}
         animationType="fade"
@@ -249,9 +229,6 @@ export default function RankingScreen() {
         </View>
       </Modal>
 
-      {/* =============================== */}
-      {/* RANKING                        */}
-      {/* =============================== */}
       {erroGrupo ? (
         <View style={{ marginTop: 20 }}>
           <Text style={{ color: "#fff", textAlign: "center", paddingHorizontal: 20 }}>
@@ -301,7 +278,7 @@ export default function RankingScreen() {
 
                 <View style={{ flex: 1 }}>
                   <Text style={styles.userName}>{item.nome}</Text>
-                  <Text style={styles.userSub}>{item.pontos} check-ins</Text>
+                  <Text style={styles.userSub}>{item.pontos} pontos</Text>
                 </View>
 
                 <Text style={[styles.star, { color: positionColor }]}>★</Text>
@@ -314,14 +291,12 @@ export default function RankingScreen() {
   );
 }
 
-// =====================================
-// ESTILOS
-// =====================================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#0F1724",
+    padding: 20,
+    paddingBottom: 100,
   },
   loading: {
     flex: 1,

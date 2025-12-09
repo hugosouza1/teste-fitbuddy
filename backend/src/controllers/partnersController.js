@@ -17,7 +17,7 @@ const addPartner = async (req, res) => {
     `
     try{
         await pool.query('BEGIN')
-        const queryRes = await pool.query(query, [userEmail, partnerEmail])
+        await pool.query(query, [userEmail, partnerEmail])
         await pool.query('COMMIT')
         return res.status(201).json({sucess: true})
 

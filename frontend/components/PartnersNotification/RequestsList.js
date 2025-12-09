@@ -1,4 +1,3 @@
-import React from 'react'
 import { FlatList, Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
